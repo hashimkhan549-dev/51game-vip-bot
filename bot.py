@@ -4,6 +4,7 @@ import threading
 import os
 import json
 import urllib.request
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # --- 1. CONFIGURATION ---
 TOKEN = "7731737827:AAH0pYcBy8B33V_HhD65_fI_C55543"
@@ -23,10 +24,12 @@ def get_vip_prediction():
         "━━━━━━━━━━━━━━━━━━"
     )
 
-# --- 3. TELEGRAM SENDER (INBUILT SYSTEM) ---
+# --- 3. TELEGRAM SENDER (INBUILT TOOL) ---
 def send_telegram_msg():
+    print(f"🔄 Attempting to send message at {time.strftime('%H:%M:%S')}...")
     text = get_vip_prediction()
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    
     data = json.dumps({
         "chat_id": CHAT_ID,
         "text": text,
@@ -37,12 +40,11 @@ def send_telegram_msg():
     try:
         with urllib.request.urlopen(req) as response:
             if response.getcode() == 200:
-                print(f"✅ MESSAGE SENT: {time.strftime('%H:%M:%S')}")
+                print(f"✅ MESSAGE SENT SUCCESSFULLY at {time.strftime('%H:%M:%S')}")
     except Exception as e:
-        print(f"❌ TELEGRAM ERROR: {e}")
+        print(f"❌ TELEGRAM ERROR: {str(e)}")
 
 # --- 4. RENDER STAY-ALIVE TOOL ---
-from http.server import HTTPServer, BaseHTTPRequestHandler
 class SimpleServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -51,16 +53,17 @@ class SimpleServer(BaseHTTPRequestHandler):
 
 def run_server():
     port = int(os.environ.get("PORT", 10000))
+    print(f"🌍 Web Server Tool starting on port {port}...")
     server = HTTPServer(('0.0.0.0', port), SimpleServer)
     server.serve_forever()
 
-# --- 5. MAIN START ---
+# --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
     # Server thread shuru karo
     threading.Thread(target=run_server, daemon=True).start()
     
-    print("🤖 Bot is starting... No external tools needed.")
+    print("🤖 VIP Bot Engine Started...")
     while True:
         send_telegram_msg()
-        # 1 minute ka wait
+        # Har 1 minute mein prediction
         time.sleep(60)
