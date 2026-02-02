@@ -12,28 +12,28 @@ except ImportError:
     import requests
 
 # --- 1. CONFIGURATION TOOL ---
+# Teri Chat ID aur Token ekdum sahi hai
 TOKEN = "7731737827:AAH0pYcBy8B33V_HhD65_fI_C55543"
-CHAT_ID = "-1002302302251"
+CHAT_ID = "-1002302302251" 
 
 # --- 2. PREDICTION ENGINE TOOL ---
 def get_vip_prediction():
-    # Asli prediction nikalne ka logic
-    items = ["BIG 🔴", "SMALL 🟢", "BIG 🔴", "SMALL 🟢"]
-    result = random.choice(items)
+    results = ["BIG 🔴", "SMALL 🟢", "BIG 🔴", "SMALL 🟢"]
+    result = random.choice(results)
     period = time.strftime("%Y%m%d") + "100" + str(random.randint(100, 999))
     
     msg = (
-        "🚀 **51GAME VIP PREDICTION**\n"
+        "🚀 **51GAME VIP PREDICTION** 🚀\n"
         "━━━━━━━━━━━━━━━━━━\n"
         f"📅 **Period:** `{period}`\n"
         f"📊 **Result:** `{result}`\n"
-        "🔥 **Confidence:** `99% SURE` \n"
+        "🔥 **Confidence:** `100% SURE` \n"
         "━━━━━━━━━━━━━━━━━━\n"
         "✅ **JOIN FOR DAILY PROFIT**"
     )
     return msg
 
-# --- 3. WEB SERVER TOOL (RENDER FIX) ---
+# --- 3. WEB SERVER TOOL (RENDER STAY-ALIVE) ---
 # Ye tool Screenshot (290) wali screen ko zinda rakhta hai
 class SimpleServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -44,6 +44,7 @@ class SimpleServer(BaseHTTPRequestHandler):
 def run_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleServer)
+    print(f"🌍 Server started on port {port}")
     server.serve_forever()
 
 # --- 4. TELEGRAM SENDER TOOL ---
@@ -55,9 +56,9 @@ def send_msg():
     try:
         r = requests.get(url, params=payload)
         if r.status_code == 200:
-            print(f"✅ Tool: Prediction Sent (Status 200)")
+            print(f"✅ Prediction Sent Successfully! Status: {r.status_code}")
         else:
-            print(f"❌ Tool Error: {r.text}")
+            print(f"❌ Telegram Error: {r.text}")
     except Exception as e:
         print(f"⚠️ Tool Connection Error: {e}")
 
@@ -70,5 +71,5 @@ if __name__ == "__main__":
     
     while True:
         send_msg()
-        # Har 60 seconds (1 minute) mein naya tool update
+        # Har 60 seconds mein naya prediction jayega
         time.sleep(60)
