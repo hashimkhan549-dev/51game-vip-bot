@@ -4,14 +4,12 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
 
-# --- CONFIGURATION ---
-# Tumhara Bot Token
+# --- TOOL 1: CONFIGURATION ---
 TOKEN = "7731737827:AAH0pYcBy8B33V_HhD65_fI_C55543" 
-# Tumhara Chat ID
 CHAT_ID = "-1002302302251" 
 
-# --- WEB SERVER TOOL (RENDER FIX) ---
-# Ye tool Render ko signal deta hai ki service "Live" hai
+# --- TOOL 2: WEB SERVER (RENDER STAY-ALIVE TOOL) ---
+# Ye tool Render ko signal deta hai ki bot active hai
 class SimpleServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -19,15 +17,14 @@ class SimpleServer(BaseHTTPRequestHandler):
         self.wfile.write(b"51Game Bot is Running 24/7")
 
 def run_server():
-    # Render default port 10000 use karta hai
+    # Render default port 10000 detect karne wala tool
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleServer)
-    print(f"🌍 Web Server started on port {port}")
+    print(f"🌍 Tool: Web Server active on port {port}")
     server.serve_forever()
 
-# --- PREDICTION LOGIC ---
+# --- TOOL 3: PREDICTION ENGINE ---
 def send_prediction():
-    # Prediction message format
     message = "🚀 **51GAME VIP PREDICTION**\n"
     message += "========================\n"
     message += "🎰 Game: WinGo 1-Min\n"
@@ -38,25 +35,18 @@ def send_prediction():
     
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    
     try:
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            print(f"✅ Status: 200 | Prediction sent at {time.ctime()}")
-        else:
-            print(f"❌ Failed to send: {response.text}")
+        r = requests.get(url, params=params)
+        print(f"✅ Prediction Tool: Status {r.status_code}")
     except Exception as e:
-        print(f"⚠️ Error: {e}")
+        print(f"❌ Error: {e}")
 
-# --- MAIN EXECUTION ---
+# --- TOOL 4: MAIN RUNNER (MULTI-THREADING) ---
 if __name__ == "__main__":
-    # 1. Web Server ko background thread mein chalao taaki bot aur server dono chalein
+    # Server ko background mein chalane ka tool
     threading.Thread(target=run_server, daemon=True).start()
     
-    print("🤖 Bot is starting on Render...")
-    
-    # 2. Prediction loop shuru karo
+    print("🤖 All Tools starting... Bot is LIVE!")
     while True:
         send_prediction()
-        # Har 60 seconds (1 minute) mein ek prediction jayegi
-        time.sleep(60)
+        time.sleep(60) # Har 1 minute mein message jayega
