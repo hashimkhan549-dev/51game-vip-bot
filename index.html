@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>HK TEAM VIP - FINAL 20 LIST</title>
+    <style>
+        :root { --neon: #00ff41; --danger: #ff003c; --gold: #ffea00; --bg: #050505; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        #game-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; }
+        #floating-widget { position: absolute; top: 100px; left: 20px; width: 280px; z-index: 9999; cursor: move; touch-action: none; }
+        #widget-logo { width: 60px; height: 60px; background: var(--bg); border: 2px solid var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px var(--neon); cursor: pointer; position: absolute; top: 0; left: 0; z-index: 10000; }
+        .logo-text { color: var(--neon); font-weight: 900; font-size: 12px; text-align: center; line-height: 1; }
+        .glass-box { background: rgba(5, 5, 5, 0.95); border: 1px solid var(--neon); border-radius: 15px; padding: 15px; backdrop-filter: blur(10px); text-align: center; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .zigzag-name { font-size: 18px; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--neon); margin-bottom: 10px; }
+        .pred-val { font-size: 35px; font-weight: 900; margin: 5px 0; text-shadow: 0 0 15px var(--neon); color: #fff; }
+        table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 10px; color: #fff; }
+        th { color: #888; border-bottom: 1px solid #333; padding: 5px; }
+        td { padding: 5px; border-bottom: 1px solid #222; text-align: center; }
+        .win { color: var(--neon); font-weight: bold; }
+        .loss { color: var(--danger); font-weight: bold; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <iframe id="game-bg" src="https://www.tgdream.bio/#/register?invitationCode=8617623631952"></iframe>
+
+    <div id="floating-widget">
+        <div id="widget-logo" onclick="toggleWidget()">
+            <div class="logo-text">HK<br>VIP</div>
+        </div>
+        <div id="content-panel" class="glass-box">
+            <div class="zigzag-name">HK TEAM VIP</div>
+            <div style="color: #888; font-size: 11px;" id="pID">PERIOD: LOADING...</div>
+            <div class="pred-val" id="pRes">WAIT...</div>
+            <div id="pOpps" style="color:var(--gold); font-size:10px; border:1px dashed; padding:3px;">ANALYZING...</div>
+            <div style="max-height: 150px; overflow-y: auto;">
+                <table>
+                    <thead><tr><th>PRD</th><th>PRED</th><th>NUM</th><th>STA</th></tr></thead>
+                    <tbody id="logs"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const BOT_TOKEN = "8108157049:AAHV4PPCuctG63qAsN8Acx8_RRisMXgA_uM";
+    const CHAT_ID = "-1002657553575";
+    const REG_LINK = "https://www.51gamen.com/#/register?invitationCode=272354906225"; 
+    
+    let predictionHistory = [];
+
+    function postToTG(text) {
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=Markdown&disable_web_page_preview=true`)
+        .catch(e => console.log("TG Error"));
+    }
+
+    async function runLogic() {
+        setInterval(async () => {
+            try {
+                const res = await fetch('https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json');
+                const json = await res.json();
+                const latest = json.data.list[0];
+
+                if(window.lastId !== latest.issueNumber) {
+                    const actualNum = parseInt(latest.number);
+                    const actualSize = actualNum >= 5 ? "BIG" : "SMALL";
+                    
+                    if(predictionHistory.length > 0) {
+                        let lastEntry = predictionHistory[predictionHistory.length - 1];
+                        lastEntry.status = (lastEntry.pred === actualSize) ? "WIN ✅" : "LOSE ❌";
+                    }
+
+                    const last5 = json.data.list.slice(0, 5).map(x => parseInt(x.number) >= 5 ? "BIG" : "SMALL");
+                    const nextPred = last5.filter(x => x === "BIG").length > 2 ? "BIG" : "SMALL";
+
+                    if(window.lastId) {
+                        const isWin = (window.savedPrediction === actualSize);
+                        const row = `<tr><td>${latest.issueNumber.slice(-3)}</td><td>${window.savedPrediction}</td><td>${actualNum}</td><td class="${isWin?'win':'loss'}">${isWin?'WIN✅':'LOSS❌'}</td></tr>`;
+                        document.getElementById('logs').innerHTML = row + document.getElementById('logs').innerHTML;
+                    }
+
+                    window.lastId = latest.issueNumber;
+                    window.savedPrediction = nextPred;
+                    const nextId3 = (BigInt(latest.issueNumber) + 1n).toString().slice(-3);
+
+                    predictionHistory.push({ period: nextId3, pred: nextPred, status: "⏳" });
+                    if(predictionHistory.length > 20) predictionHistory.shift();
+
+                    let msg = "=====================\n🔴 WinGo 1Min - 51game 🟢\n=====================\n";
+                    predictionHistory.forEach(item => {
+                        msg += `${item.period} 1 MIN 【 ${item.pred} 】 ${item.status}\n`;
+                    });
+                    msg += "======================\nCLAIM YOUR WINSTREAK BONUS NOW ‼️\n======================\nOfficial 51Game Link :\n" + REG_LINK;
+                    
+                    postToTG(msg);
+
+                    const pool = nextPred === "BIG" ? [0,1,2,3,4] : [5,6,7,8,9];
+                    window.savedOpps = pool.sort(() => 0.5 - Math.random()).slice(0, 2);
+                }
+
+                document.getElementById('pID').innerText = "PERIOD: " + (BigInt(latest.issueNumber) + 1n).toString();
+                document.getElementById('pRes').innerText = window.savedPrediction || "WAIT...";
+                document.getElementById('pOpps').innerText = "OPP: " + (window.savedOpps ? window.savedOpps.join(", ") : "...");
+            } catch(e) {}
+        }, 3000);
+    }
+
+    const widget = document.getElementById("floating-widget");
+    let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+    widget.addEventListener("touchstart", (e) => {
+        initialX = e.touches[0].clientX - xOffset;
+        initialY = e.touches[0].clientY - yOffset;
+        if (e.target.closest('#widget-logo') || e.target.closest('.zigzag-name')) isDragging = true;
+    }, {passive: false});
+    document.addEventListener("touchend", () => { isDragging = false; initialX = currentX; initialY = currentY; });
+    document.addEventListener("touchmove", (e) => {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.touches[0].clientX - initialX;
+            currentY = e.touches[0].clientY - initialY;
+            xOffset = currentX; yOffset = currentY;
+            widget.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+        }
+    }, {passive: false});
+    function toggleWidget() { document.getElementById('content-panel').classList.toggle('hidden'); }
+    window.onload = runLogic;
+</script>
+</body>
+</html>
