@@ -1,14 +1,13 @@
-import os
 import time
 import random
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import urllib.request
+import os
 import json
+import urllib.request
 
 # --- 1. CONFIGURATION ---
 TOKEN = "7731737827:AAH0pYcBy8B33V_HhD65_fI_C55543"
-CHAT_ID = "-1002302302251" 
+CHAT_ID = "-1002302302251"
 
 # --- 2. PREDICTION LOGIC ---
 def get_vip_prediction():
@@ -24,7 +23,26 @@ def get_vip_prediction():
         "━━━━━━━━━━━━━━━━━━"
     )
 
-# --- 3. WEB SERVER (RENDER FIX) ---
+# --- 3. TELEGRAM SENDER (INBUILT SYSTEM) ---
+def send_telegram_msg():
+    text = get_vip_prediction()
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = json.dumps({
+        "chat_id": CHAT_ID,
+        "text": text,
+        "parse_mode": "Markdown"
+    }).encode('utf-8')
+    
+    req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
+    try:
+        with urllib.request.urlopen(req) as response:
+            if response.getcode() == 200:
+                print(f"✅ MESSAGE SENT: {time.strftime('%H:%M:%S')}")
+    except Exception as e:
+        print(f"❌ TELEGRAM ERROR: {e}")
+
+# --- 4. RENDER STAY-ALIVE TOOL ---
+from http.server import HTTPServer, BaseHTTPRequestHandler
 class SimpleServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -36,27 +54,13 @@ def run_server():
     server = HTTPServer(('0.0.0.0', port), SimpleServer)
     server.serve_forever()
 
-# --- 4. TELEGRAM SENDER (INTERNAL TOOL) ---
-def send_msg():
-    text = get_vip_prediction()
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    data = json.dumps({"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"}).encode('utf-8')
-    req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
-    
-    try:
-        with urllib.request.urlopen(req) as response:
-            if response.getcode() == 200:
-                print(f"✅ SUCCESS: Prediction sent at {time.strftime('%H:%M:%S')}")
-    except urllib.error.HTTPError as e:
-        error_msg = e.read().decode()
-        # YE LINE LOGS MEIN BATAYEGI KI KYA GALTI HAI
-        print(f"❌ TELEGRAM ERROR: {error_msg}") 
-    except Exception as e:
-        print(f"⚠️ SYSTEM ERROR: {e}")
-
+# --- 5. MAIN START ---
 if __name__ == "__main__":
+    # Server thread shuru karo
     threading.Thread(target=run_server, daemon=True).start()
-    print("🤖 Bot is starting... Check Logs for status.")
+    
+    print("🤖 Bot is starting... No external tools needed.")
     while True:
-        send_msg()
+        send_telegram_msg()
+        # 1 minute ka wait
         time.sleep(60)
