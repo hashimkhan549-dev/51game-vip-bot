@@ -7,29 +7,24 @@ import urllib.request
 import json
 
 # --- 1. CONFIGURATION ---
-# Teri Chat ID aur Token ekdum sahi hai
 TOKEN = "7731737827:AAH0pYcBy8B33V_HhD65_fI_C55543"
 CHAT_ID = "-1002302302251" 
 
-# --- 2. PREDICTION ENGINE TOOL ---
+# --- 2. PREDICTION LOGIC ---
 def get_vip_prediction():
-    results = ["BIG 🔴", "SMALL 🟢", "BIG 🔴", "SMALL 🟢"]
+    results = ["BIG 🔴", "SMALL 🟢"]
     result = random.choice(results)
     period = time.strftime("%Y%m%d") + "100" + str(random.randint(100, 999))
-    
-    msg = (
-        "🚀 **51GAME VIP PREDICTION** 🚀\n"
+    return (
+        "🚀 **51GAME VIP PREDICTION**\n"
         "━━━━━━━━━━━━━━━━━━\n"
         f"📅 **Period:** `{period}`\n"
         f"📊 **Result:** `{result}`\n"
         "🔥 **Confidence:** `100% SURE` \n"
-        "━━━━━━━━━━━━━━━━━━\n"
-        "✅ **JOIN FOR DAILY PROFIT**"
+        "━━━━━━━━━━━━━━━━━━"
     )
-    return msg
 
-# --- 3. WEB SERVER TOOL (RENDER STAY-ALIVE) ---
-# Isse Screenshot (290) wali screen zinda rahegi
+# --- 3. WEB SERVER (RENDER FIX) ---
 class SimpleServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -37,33 +32,31 @@ class SimpleServer(BaseHTTPRequestHandler):
         self.wfile.write(b"51Game VIP Bot is Active 24/7")
 
 def run_server():
-    # Render port 10000 detect kar raha hai
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleServer)
     server.serve_forever()
 
-# --- 4. TELEGRAM SENDER (WITHOUT REQUESTS TOOL) ---
-# Maine isse badal diya hai taaki 'requests' ki galti na aaye
+# --- 4. TELEGRAM SENDER (INTERNAL TOOL) ---
 def send_msg():
     text = get_vip_prediction()
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     data = json.dumps({"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"}).encode('utf-8')
-    
     req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
+    
     try:
         with urllib.request.urlopen(req) as response:
             if response.getcode() == 200:
-                print(f"✅ Prediction Sent Successfully!")
+                print(f"✅ SUCCESS: Prediction sent at {time.strftime('%H:%M:%S')}")
+    except urllib.error.HTTPError as e:
+        error_msg = e.read().decode()
+        # YE LINE LOGS MEIN BATAYEGI KI KYA GALTI HAI
+        print(f"❌ TELEGRAM ERROR: {error_msg}") 
     except Exception as e:
-        print(f"❌ Telegram Error: {e}")
+        print(f"⚠️ SYSTEM ERROR: {e}")
 
-# --- 5. MAIN RUNNER ---
 if __name__ == "__main__":
-    # Server Tool ko background mein chalao
     threading.Thread(target=run_server, daemon=True).start()
-    
-    print("🤖 VIP Bot is Starting...")
+    print("🤖 Bot is starting... Check Logs for status.")
     while True:
         send_msg()
-        # Har 60 seconds mein prediction
         time.sleep(60)
