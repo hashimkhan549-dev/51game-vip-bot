@@ -8,7 +8,7 @@ import threading
 TOKEN = "7731737827:AAH0pYcBy8B33V_HhD65_fI_C55543" 
 CHAT_ID = "-1002302302251" 
 
-# Render port fix (Zaroori hai warna Timed Out aayega)
+# Render port error fix karne ke liye (Zaroori hai)
 class SimpleServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -18,18 +18,17 @@ class SimpleServer(BaseHTTPRequestHandler):
 def run_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleServer)
-    print(f"🌍 Server started on port {port}")
     server.serve_forever()
 
 def send_prediction():
-    message = "🚀 **51GAME VIP PREDICTION**\n\n✅ BOT IS NOW LIVE ON RENDER!"
+    message = "🚀 **51GAME VIP PREDICTION**\n✅ BOT IS LIVE ON RENDER!"
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
     try:
         r = requests.get(url, params=params)
-        print(f"Status: {r.status_code}")
+        print(f"✅ Status: {r.status_code}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
     # Server start karo taaki Render timeout na de
@@ -38,4 +37,4 @@ if __name__ == "__main__":
     print("🤖 Bot is starting...")
     while True:
         send_prediction()
-        time.sleep(60)
+        time.sleep(60) # Har 1 minute mein prediction
